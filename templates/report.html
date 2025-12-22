@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial; font-size: 12px; }
+        h1, h2 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: right; }
+        th { background: #f4f6f8; }
+        td:first-child, th:first-child { text-align: left; }
+    </style>
+</head>
+<body>
+
+<h1 style="text-align:center; font-family:Arial; font-size:20px; margin-bottom:10px;">
+    Informe de Ventas e Inventario
+</h1>
+
+<p style="text-align:center; font-family:Arial; font-size:12px; margin-bottom:20px;">
+    Período: {{ fecha_inicio }} a {{ fecha_fin }}
+</p>
+
+<h2>Ventas Totales</h2>
+<table>
+<tr>
+    <th>Departamento</th>
+    <th>MAYOR</th>
+    <th>DETAL</th>
+    <th>TOTAL</th>
+</tr>
+
+{% for r in ventas_totales.itertuples() %}
+<tr {% if r.Departamento == 'TOTAL GENERAL' %}style="font-weight:bold;background:#f0f0f0"{% endif %}>
+    <td>{{ r.Departamento }}</td>
+    <td>{{ "{:,.0f}".format(r.MAYOR) }}</td>
+    <td>{{ "{:,.0f}".format(r.DETAL) }}</td>
+    <td>{{ "{:,.0f}".format(r.TOTAL) }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Unidades Vendidas</h2>
+<table>
+<tr>
+    <th>Departamento</th>
+    <th>MAYOR</th>
+    <th>DETAL</th>
+    <th>TOTAL</th>
+</tr>
+
+{% for r in unidades.itertuples() %}
+<tr {% if r.Departamento == 'TOTAL GENERAL' %}style="font-weight:bold;background:#f0f0f0"{% endif %}>
+    <td>{{ r.Departamento }}</td>
+    <td>{{ r.MAYOR }}</td>
+    <td>{{ r.DETAL }}</td>
+    <td>{{ r.TOTAL }}</td>
+</tr>
+{% endfor %}
+</table>
+
+
+<h2>Ventas por Modelo</h2>
+<table>
+<tr><th>Modelo</th><th>Unidades</th></tr>
+{% for r in ventas_modelo.itertuples() %}
+<tr><td>{{r.Modelo}}</td><td>{{r.Cantidad}}</td></tr>
+{% endfor %}
+</table>
+
+<h2>Comisiones</h2>
+<table>
+<tr><th>Departamento</th><th>Comisión</th></tr>
+{% for r in comisiones.itertuples() %}
+<tr><td>{{r.Departamento}}</td><td>{{"{:,.0f}".format(r.Comision)}}</td></tr>
+{% endfor %}
+<tr><th>Total</th><th>{{"{:,.0f}".format(total_comisiones)}}</th></tr>
+</table>
+
+<h2>Consolidado por Conjunto (Sin Talla)</h2>
+<table>
+<tr>
+    <th>Conjunto</th>
+    <th>Inventario</th>
+    <th>Vendido</th>
+    <th>Total</th>
+</tr>
+
+{% for r in consolidado_modelo.itertuples() %}
+<tr>
+    <td>{{ r.Modelo }}</td>
+    <td>{{ r.Inventario }}</td>
+    <td>{{ r.Vendido }}</td>
+    <td><strong>{{ r.Total }}</strong></td>
+</tr>
+{% endfor %}
+</table>
+
+
+<h2>Consolidado por Código</h2>
+<table>
+<tr><th>Código</th><th>Descripción</th><th>Inventario</th><th>Vendidas</th><th>Total</th></tr>
+{% for r in consolidado.itertuples() %}
+<tr>
+<td>{{r.Código}}</td>
+<td>{{r.Descripción}}</td>
+<td>{{r.Existencia}}</td>
+<td>{{r.Vendidas}}</td>
+<td>{{r.Total_General}}</td>
+</tr>
+{% endfor %}
+</table>
+
+</body>
+</html>

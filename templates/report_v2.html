@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte de Ventas e Inventario</title>
+<style>
+  /* Tailwind básico embebido */
+  body { font-family: Arial, sans-serif; background-color: #f3f4f6; color: #1f2937; padding: 1.5rem; }
+  h1 { font-size: 1.75rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem; text-align:center; }
+  h2.section-title { font-size: 1.25rem; font-weight: 600; color: #1e40af; margin-top: 2rem; margin-bottom: 0.5rem; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; }
+  th, td { border: 1px solid #d1d5db; padding: 0.5rem; text-align: center; }
+  th { background-color: #1d4ed8; color: white; font-weight: 600; }
+  tr:nth-child(even) { background-color: #e5e7eb; }
+  tr.total-general { font-weight: bold; background-color: #fbbf24 !important; }
+  .negative-value { color: red !important}
+</style>
+</head>
+<body>
+
+<h1>Informe de Ventas e Inventario</h1>
+<p style="text-align:center; margin-bottom:1.5rem;">Período: <strong>{{ fecha_inicio }}</strong> a <strong>{{ fecha_fin }}</strong></p>
+
+<!-- Unidades Vendidas -->
+<h2 class="section-title">Unidades Vendidas por Departamento</h2>
+<table>
+<tr>
+    <th>Departamento</th>
+    <th>MAYOR</th>
+    <th>DETAL</th>
+    <th>TOTAL</th>
+</tr>
+{% for r in unidades.itertuples() %}
+<tr {% if r.Departamento == 'TOTAL GENERAL' %}class="total-general"{% endif %}>
+    <td>{{ r.Departamento }}</td>
+    <td>{{ r.MAYOR }}</td>
+    <td>{{ r.DETAL }}</td>
+    <td>{{ r.TOTAL }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<!-- Balance Total por Departamento -->
+<h2 class="section-title">Balance Total por Departamento</h2>
+<table>
+<tr>
+    <th>Departamento</th>
+    <th>MAYOR</th>
+    <th>DETAL</th>
+    <th>Total Ventas</th>
+    <th>Comisión (-)</th>
+    <th>Total Neto</th>
+</tr>
+{% for r in balance_depto.itertuples() %}
+<tr {% if r.Departamento == 'TOTAL GENERAL' %}class="total-general"{% endif %}>
+    <td>{{ r.Departamento }}</td>
+    <td>{{ "{:,.0f}".format(r.MAYOR) }}</td>
+    <td>{{ "{:,.0f}".format(r.DETAL) }}</td>
+    <td>{{ "{:,.0f}".format(r.Total_Ventas) }}</td>
+    <td class="negative-value">{{ "{:,.0f}".format(r.Comision) }}</td>
+    <td>{{ "{:,.0f}".format(r.Total_Neto) }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<!-- Ventas Totales -->
+<h2 class="section-title">Ventas Totales por Departamento</h2>
+<table>
+<tr>
+    <th>Departamento</th>
+    <th>MAYOR</th>
+    <th>DETAL</th>
+    <th>TOTAL</th>
+</tr>
+{% for r in ventas_totales.itertuples() %}
+<tr {% if r.Departamento == 'TOTAL GENERAL' %}class="total-general"{% endif %}>
+    <td>{{ r.Departamento }}</td>
+    <td>{{ "{:,.0f}".format(r.MAYOR) }}</td>
+    <td>{{ "{:,.0f}".format(r.DETAL) }}</td>
+    <td>{{ "{:,.0f}".format(r.TOTAL) }}</td>
+</tr>
+{% endfor %}
+</table>
+
+
+<!-- Comisiones -->
+<h2 class="section-title">Comisiones por Departamento</h2>
+<table>
+<tr>
+    <th>Departamento</th>
+    <th>Comisión</th>
+</tr>
+{% for r in comisiones.itertuples() %}
+<tr {% if r.Departamento == 'TOTAL GENERAL' %}class="total-general"{% endif %}>
+    <td>{{ r.Departamento }}</td>
+    <td>{{ "{:,.0f}".format(r.Comision) }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<!-- Consolidado por Conjunto -->
+<h2 class="section-title">Consolidado por Conjunto (Sin Talla)</h2>
+<table>
+<tr>
+    <th>Conjunto</th>
+    <th>Inventario</th>
+    <th>Vendido</th>
+    <th>Total</th>
+</tr>
+{% for r in consolidado_modelo.itertuples() %}
+<tr>
+    <td>{{ r.Modelo }}</td>
+    <td>{{ r.Inventario }}</td>
+    <td>{{ r.Vendido }}</td>
+    <td>{{ r.Total }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<!-- Consolidado por Código -->
+<h2 class="section-title">Consolidado por Código</h2>
+<table>
+<tr>
+    <th>Código</th>
+    <th>Descripción</th>
+    <th>Existencia</th>
+    <th>Vendidas</th>
+    <th>Total General</th>
+</tr>
+{% for r in consolidado.itertuples() %}
+<tr>
+    <td>{{ r.Código }}</td>
+    <td>{{ r.Descripción }}</td>
+    <td>{{ r.Existencia }}</td>
+    <td>{{ r.Vendidas }}</td>
+    <td>{{ r.Total_General }}</td>
+</tr>
+{% endfor %}
+</table>
+
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Reportes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center mb-6 text-gray-700">Generador de Reportes</h1>
+
+    <form method="POST" action="/generar" enctype="multipart/form-data" class="space-y-4">
+        <div>
+            <label class="block font-semibold text-gray-600">Archivo Ventas</label>
+            <input type="file" name="ventas" required class="mt-1 block w-full text-gray-700 border border-gray-300 rounded-md p-2"/>
+        </div>
+
+        <div>
+            <label class="block font-semibold text-gray-600">Archivo Inventario</label>
+            <input type="file" name="inventario" required class="mt-1 block w-full text-gray-700 border border-gray-300 rounded-md p-2"/>
+        </div>
+
+        <div>
+            <label class="block font-semibold text-gray-600">Fecha Inicio</label>
+            <input type="date" name="fecha_inicio" required class="mt-1 block w-full text-gray-700 border border-gray-300 rounded-md p-2"/>
+        </div>
+
+        <div>
+            <label class="block font-semibold text-gray-600">Fecha Fin</label>
+            <input type="date" name="fecha_fin" required class="mt-1 block w-full text-gray-700 border border-gray-300 rounded-md p-2"/>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition">Generar PDF</button>
+    </form>
+</div>
+
+</body>
+</html>
