@@ -3,3 +3,4 @@ pandas
 openpyxl
 pdfkit
 jinja2
+pyinstaller

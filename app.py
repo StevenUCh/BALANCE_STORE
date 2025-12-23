@@ -33,7 +33,7 @@ def generar():
     resultados['fecha_fin'] = fecha_fin
 
     # Generar HTML
-    html = render_template('report_v2.html', **resultados)
+    html = render_template('report_v3.html', **resultados)
 
     # Nombre del PDF con fechas
     pdf_filename = f"Reporte_{fecha_inicio}_{fecha_fin}.pdf"
@@ -54,4 +54,4 @@ def generar():
     return send_file(pdf_filename, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5716)
+    app.run(debug=False, port=5716, host="127.0.0.1", use_reloader=False)
