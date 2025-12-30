@@ -1,11 +1,5 @@
-# ==========================
-# Dockerfile para Flask + pdfkit + wkhtmltopdf
-# ==========================
-
-# Imagen base
 FROM python:3.9-slim
 
-# Variables de entorno
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -16,14 +10,13 @@ RUN apt-get update && apt-get install -y \
     libxrender1 \
     libxext6 \
     curl \
-    xz-utils \
+    fontconfig \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar wkhtmltopdf (estático)
-RUN curl -L -o wkhtmltox.tar.xz https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.6-1/wkhtmltox-0.12.6-1_linux-generic-amd64.tar.xz \
-    && tar -xJf wkhtmltox.tar.xz \
-    && mv wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf \
-    && rm -rf wkhtmltox.tar.xz wkhtmltox
+# Descargar e instalar wkhtmltopdf versión precompilada
+RUN curl -L -o wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb \
+    && apt-get install -y ./wkhtmltox.deb \
+    && rm wkhtmltox.deb
 
 # Crear directorio de la app
 WORKDIR /app
@@ -36,7 +29,7 @@ COPY . .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Exponer puerto (Railway asignará uno dinámico, pero usamos 5716 para local)
+# Exponer puerto
 EXPOSE 5716
 
 # Comando para ejecutar la app
