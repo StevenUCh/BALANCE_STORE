@@ -3,13 +3,19 @@ import pandas as pd
 import pdfkit
 from report_logic import procesar_datos
 from datetime import datetime
+import os
+import sys
+import signal
 
 app = Flask(__name__)
 
-# Ruta a wkhtmltopdf (ajustar según tu instalación)
-config = pdfkit.configuration(
-    wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-)
+
+if getattr(sys, 'frozen', False):
+    wkhtml = os.path.join(sys._MEIPASS, "wkhtmltopdf", "bin", "wkhtmltopdf.exe")
+else:
+    wkhtml = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+
+config = pdfkit.configuration( wkhtmltopdf=wkhtml )
 
 @app.route('/')
 def index():
@@ -52,6 +58,15 @@ def generar():
     pdfkit.from_string(html, pdf_filename, configuration=config, options=options)
 
     return send_file(pdf_filename, as_attachment=True)
+
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    # Leer PID del launcher
+    with open("flask_pid.txt", "r") as f:
+        pid = int(f.read())
+    # Matar proceso Flask
+    os.kill(pid, signal.SIGTERM)
+    return "<h3>Servidor detenido. Puedes cerrar esta ventana.</h3>"
 
 if __name__ == '__main__':
     app.run(debug=False, port=5716, host="127.0.0.1", use_reloader=False)
