@@ -1,27 +1,34 @@
-FROM python:3.9-slim
+# Usamos una imagen ligera de Python 3.9
+FROM python:3.9-alpine
 
+# Evitar bytecode y usar stdout sin buffer
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
-    xfonts-75dpi \
-    xfonts-base \
-    libxrender1 \
-    libxext6 \
+# Instalar dependencias necesarias para wkhtmltopdf y fonts
+RUN apk add --no-cache \
+    bash \
     curl \
+    ttf-dejavu \
     fontconfig \
-    && rm -rf /var/lib/apt/lists/*
+    libxext \
+    libxrender \
+    libjpeg-turbo \
+    xorg-server \
+    xvfb
 
-# Descargar e instalar wkhtmltopdf versión precompilada
-RUN curl -L -o wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb \
-    && apt-get install -y ./wkhtmltox.deb \
-    && rm wkhtmltox.deb
+# Descargar wkhtmltopdf versión Linux genérica (amd64)
+RUN curl -L -o wkhtmltox.tar.xz https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.6-1/wkhtmltox-0.12.6-1_linux-generic-amd64.tar.xz \
+    && apk add --no-cache xz \
+    && tar -xJf wkhtmltox.tar.xz \
+    && mv wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf \
+    && rm -rf wkhtmltox.tar.xz wkhtmltox \
+    && apk del xz
 
 # Crear directorio de la app
 WORKDIR /app
 
-# Copiar archivos Python y templates
+# Copiar archivos de la app
 COPY requirements.txt .
 COPY . .
 
@@ -29,8 +36,8 @@ COPY . .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Exponer puerto
+# Exponer puerto que usará Flask
 EXPOSE 5716
 
-# Comando para ejecutar la app
-CMD ["python", "app.py"]
+# Comando para ejecutar la app con xvfb para que wkhtmltopdf funcione sin pantalla
+CMD ["xvfb-run", "--auto-servernum", "--server-args='-screen 0 1024x768x24'", "python", "app.py"]
