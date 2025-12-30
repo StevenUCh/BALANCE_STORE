@@ -1,25 +1,11 @@
 from flask import Flask, render_template, request, send_file
 import pandas as pd
-import pdfkit
+from weasyprint import HTML, CSS
 from report_logic import procesar_datos
-from datetime import datetime
 import os
-import sys
-import signal
+from io import BytesIO
 
 app = Flask(__name__)
-
-if getattr(sys, 'frozen', False):
-    wkhtml = os.path.join(sys._MEIPASS, "wkhtmltopdf")
-else:
-    wkhtml = "/usr/bin/wkhtmltopdf"
-
-# if getattr(sys, 'frozen', False):
-#     wkhtml = os.path.join(sys._MEIPASS, "wkhtmltopdf", "bin", "wkhtmltopdf.exe")
-# else:
-#     wkhtml = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-
-config = pdfkit.configuration( wkhtmltopdf=wkhtml )
 
 @app.route('/')
 def index():
@@ -37,44 +23,34 @@ def generar():
 
     # Procesar datos
     resultados = procesar_datos(ventas, inventario)
-
-    # Agregar fechas al contexto
     resultados['fecha_inicio'] = fecha_inicio
     resultados['fecha_fin'] = fecha_fin
 
     # Generar HTML
-    html = render_template('report_v3.html', **resultados)
+    html_content = render_template('report_v3.html', **resultados)
 
-    # Nombre del PDF con fechas
-    pdf_filename = f"Reporte_{fecha_inicio}_{fecha_fin}.pdf"
+    # Configurar CSS para márgenes y tamaño de página
+    css = CSS(string="""
+        @page {
+            size: Letter;
+            margin-top: 10mm;
+            margin-right: 10mm;
+            margin-bottom: 10mm;
+            margin-left: 10mm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            encoding: UTF-8;
+        }
+    """)
 
-    # Opciones de PDF
-    options = {
-        'page-size': 'Letter',
-        'margin-top': '10mm',
-        'margin-right': '10mm',
-        'margin-bottom': '10mm',
-        'margin-left': '10mm',
-        'encoding': "UTF-8",
-        'enable-local-file-access': None
-    }
+    # Generar PDF en memoria
+    pdf_file = BytesIO()
+    HTML(string=html_content).write_pdf(pdf_file, stylesheets=[css])
+    pdf_file.seek(0)
 
-    pdfkit.from_string(html, pdf_filename, configuration=config, options=options)
-
-    return send_file(pdf_filename, as_attachment=True)
-
-@app.route('/shutdown', methods=['POST'])
-def shutdown():
-    # Leer PID del launcher
-    with open("flask_pid.txt", "r") as f:
-        pid = int(f.read())
-    # Matar proceso Flask
-    os.kill(pid, signal.SIGTERM)
-    return "<h3>Servidor detenido. Puedes cerrar esta ventana.</h3>"
+    return send_file(pdf_file, download_name=f"Reporte_{fecha_inicio}_{fecha_fin}.pdf", as_attachment=True)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5716))
-    app.run(host="0.0.0.0", port=port)
-
-# if __name__ == '__main__':
-#     app.run(debug=False, port=5716, host="127.0.0.1", use_reloader=False)
+    app.run(host="0.0.0.0", port=port, debug=True)

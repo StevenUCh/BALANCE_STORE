@@ -1,29 +1,37 @@
-FROM python:3.9-slim-bullseye
+# Usamos Python 3.9 slim
+FROM python:3.9-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Variables de entorno
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Instalar dependencias necesarias para WeasyPrint
 RUN apt-get update && apt-get install -y \
-    curl \
-    xfonts-75dpi \
-    xfonts-base \
-    libxrender1 \
-    libxext6 \
+    build-essential \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf2.0-0 \
+    libffi-dev \
+    libxml2 \
+    libssl-dev \
     libjpeg62-turbo \
-    fontconfig \
+    fonts-dejavu \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar wkhtmltopdf precompilado para Debian Bullseye
-RUN curl -L -o wkhtmltox.deb https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.bullseye_amd64.deb \
-    && apt-get update && apt-get install -y ./wkhtmltox.deb \
-    && rm wkhtmltox.deb \
-    && rm -rf /var/lib/apt/lists/*
-
+# Crear directorio de la app
 WORKDIR /app
+
+# Copiar requirements.txt y luego instalar dependencias
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar todo el código
 COPY . .
 
+# Exponer el puerto que usa tu app
 EXPOSE 5716
+
+# Comando por defecto para iniciar la app
 CMD ["python", "app.py"]

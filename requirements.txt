@@ -1,6 +1,6 @@
 Flask
 pandas
 openpyxl
-pdfkit
 jinja2
-pyinstaller
+weasyprint
+pyphen
