@@ -9,11 +9,15 @@ import signal
 
 app = Flask(__name__)
 
-
 if getattr(sys, 'frozen', False):
-    wkhtml = os.path.join(sys._MEIPASS, "wkhtmltopdf", "bin", "wkhtmltopdf.exe")
+    wkhtml = os.path.join(sys._MEIPASS, "wkhtmltopdf")
 else:
-    wkhtml = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+    wkhtml = "/usr/bin/wkhtmltopdf"
+
+# if getattr(sys, 'frozen', False):
+#     wkhtml = os.path.join(sys._MEIPASS, "wkhtmltopdf", "bin", "wkhtmltopdf.exe")
+# else:
+#     wkhtml = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
 
 config = pdfkit.configuration( wkhtmltopdf=wkhtml )
 
@@ -68,5 +72,9 @@ def shutdown():
     os.kill(pid, signal.SIGTERM)
     return "<h3>Servidor detenido. Puedes cerrar esta ventana.</h3>"
 
-if __name__ == '__main__':
-    app.run(debug=False, port=5716, host="127.0.0.1", use_reloader=False)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5716))
+    app.run(host="0.0.0.0", port=port)
+
+# if __name__ == '__main__':
+#     app.run(debug=False, port=5716, host="127.0.0.1", use_reloader=False)
